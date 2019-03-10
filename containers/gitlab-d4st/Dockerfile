@@ -2,9 +2,9 @@
 # system. Adds custom git hooks to the base image.
 #
 # Using the sameersbn version because it's better documented
-# and generally better organized than the office gitlab-ce 
+# and generally better organized than the office gitlab-ce
 # container.
-FROM sameersbn/gitlab:latest
+FROM sameersbn/gitlab:11.8.1
 MAINTAINER Eliot Kimber "ekimber@contrext.com"
 COPY admin-scripts /var/opt/d4st/bin/
 RUN cd /var/opt/d4st && \
@@ -13,8 +13,8 @@ RUN cd /var/opt/d4st && \
     rm develop.zip && \
     mv dfst-git-commit-hooks-develop/server-side custom_hooks && \
     cd /var/opt/d4st/bin && \
-    chmod a+x * 
-    
+    chmod a+x *
+
 ENV PATH ${PATH}:/var/opt/d4st/bin
 ENTRYPOINT ["/sbin/entrypoint.sh"]
 CMD ["app:start"]

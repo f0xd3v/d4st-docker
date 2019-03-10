@@ -51,7 +51,7 @@ services:
        - dita-ot-out:/opt/dita-ot/out:Z
     volumes_from:
        - web-delivery
- 
+
 #
 # D4ST Link Manager
 #
@@ -59,7 +59,7 @@ services:
 # for use by authors via an interactive Web app
 # or other applications via REST API.
 #
-     
+
 #
 # Link Manager server:
 #    
@@ -78,10 +78,10 @@ services:
     volumes:
        - basex-data:/srv/BaseXData
        - /Users:/Users
-  
+
     volumes_from:
      - dita-ot
- 
+
 #
 # GitLab
 #
@@ -95,82 +95,80 @@ services:
 #
   redis:
     restart: always
-    image: sameersbn/redis:latest
+    image: sameersbn/redis:4.0.9-1
     command:
-    - --loglevel warning
+      - --loglevel warning
     volumes:
-    - redis:/var/lib/redis:Z
+      - redis:/var/lib/redis:Z
 
   postgresql:
     restart: always
-    image: sameersbn/postgresql:9.6-2
+    image: sameersbn/postgresql:10
     volumes:
-    - postgress:/var/lib/postgresql:Z
+      - postgress:/var/lib/postgresql:Z
     environment:
-    - DB_USER=gitlab
-    - DB_PASS=password
-    - DB_NAME=gitlabhq_production
-    - DB_EXTENSION=pg_trgm
+      - DB_USER=gitlab
+      - DB_PASS=password
+      - DB_NAME=gitlabhq_production
+      - DB_EXTENSION=pg_trgm
 
   gitlab-d4st:
     restart: always
-    # image: sameersbn/gitlab:8.17.3
+    #image: sameersbn/gitlab:11.8.1
     image: d4st/gitlab-d4st
     container_name: gitlab-d4st
     depends_on:
       - redis
       - postgresql
-       
     ports:
       - "${GITLAB_PORT}:80"
       - "${GITLAB_SSH_PORT}:22"
-      
     volumes:
       # Create a named volume rather than a local mount:
       - git-data:/home/git/data:Z
-
     environment:
       - GITLAB_SECRETS_DB_KEY_BASE=S8ZRV6kN43LQ2sQVmVfTlM32jLzj8FFLf6L6WzxtjwqnXkZlzpc5tc3C7cXbgrqt
       - GITLAB_SECRETS_SECRET_KEY_BASE=S8ZRV6kN43LQ2sQVmVfTlM32jLzj8FFLf6L6WzxtjwqnXkZlzpc5tc3C7cXbgrqt
       - GITLAB_SECRETS_OTP_KEY_BASE=S8ZRV6kN43LQ2sQVmVfTlM32jLzj8FFLf6L6WzxtjwqnXkZlzpc5tc3C7cXbgrqt
-      
+
       - DEBUG=false
-  
+
       - DB_ADAPTER=postgresql
       - DB_HOST=postgresql
       - DB_PORT=5432
       - DB_USER=gitlab
       - DB_PASS=password
       - DB_NAME=gitlabhq_production
-  
+
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-  
-      - TZ=Asia/Kolkata
-      - GITLAB_TIMEZONE=Kolkata
-  
+
+      - TZ=Europe/Paris
+      - GITLAB_TIMEZONE=Paris
+
       - GITLAB_HTTPS=false
       - SSL_SELF_SIGNED=false
-  
+
       - GITLAB_HOST=gitlab-d4st
       # Using 80 instead of ${GITLAB_PORT} so within-docker connections will work.
       - GITLAB_PORT=80
+
       - GITLAB_SSH_PORT=${GITLAB_SSH_PORT}
       - GITLAB_RELATIVE_URL_ROOT=
-  
+
       - GITLAB_ROOT_PASSWORD=
       - GITLAB_ROOT_EMAIL=
-  
+
       - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
       - GITLAB_NOTIFY_PUSHER=false
-  
+
       - GITLAB_EMAIL=notifications@example.com
       - GITLAB_EMAIL_REPLY_TO=noreply@example.com
       - GITLAB_INCOMING_EMAIL_ADDRESS=reply@example.com
-  
+
       - GITLAB_BACKUP_SCHEDULE=daily
       - GITLAB_BACKUP_TIME=01:00
-  
+
       - SMTP_ENABLED=false
       - SMTP_DOMAIN=www.example.com
       - SMTP_HOST=smtp.gmail.com
@@ -179,7 +177,7 @@ services:
       - SMTP_PASS=password
       - SMTP_STARTTLS=true
       - SMTP_AUTHENTICATION=login
-  
+
       - IMAP_ENABLED=false
       - IMAP_HOST=imap.gmail.com
       - IMAP_PORT=993
@@ -187,7 +185,7 @@ services:
       - IMAP_PASS=password
       - IMAP_SSL=true
       - IMAP_STARTTLS=false
-  
+
       - OAUTH_ENABLED=false
       - OAUTH_AUTO_SIGN_IN_WITH_PROVIDER=
       - OAUTH_ALLOW_SSO=
@@ -195,35 +193,35 @@ services:
       - OAUTH_AUTO_LINK_LDAP_USER=false
       - OAUTH_AUTO_LINK_SAML_USER=false
       - OAUTH_EXTERNAL_PROVIDERS=
-  
+
       - OAUTH_CAS3_LABEL=cas3
       - OAUTH_CAS3_SERVER=
       - OAUTH_CAS3_DISABLE_SSL_VERIFICATION=false
       - OAUTH_CAS3_LOGIN_URL=/cas/login
       - OAUTH_CAS3_VALIDATE_URL=/cas/p3/serviceValidate
       - OAUTH_CAS3_LOGOUT_URL=/cas/logout
-  
+
       - OAUTH_GOOGLE_API_KEY=
       - OAUTH_GOOGLE_APP_SECRET=
       - OAUTH_GOOGLE_RESTRICT_DOMAIN=
-  
+
       - OAUTH_FACEBOOK_API_KEY=
       - OAUTH_FACEBOOK_APP_SECRET=
-  
+
       - OAUTH_TWITTER_API_KEY=
       - OAUTH_TWITTER_APP_SECRET=
-  
+
       - OAUTH_GITHUB_API_KEY=
       - OAUTH_GITHUB_APP_SECRET=
       - OAUTH_GITHUB_URL=
       - OAUTH_GITHUB_VERIFY_SSL=
-  
+
       - OAUTH_GITLAB_API_KEY=
       - OAUTH_GITLAB_APP_SECRET=
-  
+
       - OAUTH_BITBUCKET_API_KEY=
       - OAUTH_BITBUCKET_APP_SECRET=
-  
+
       - OAUTH_SAML_ASSERTION_CONSUMER_SERVICE_URL=
       - OAUTH_SAML_IDP_CERT_FINGERPRINT=
       - OAUTH_SAML_IDP_SSO_TARGET_URL=
@@ -234,25 +232,26 @@ services:
       - OAUTH_SAML_EXTERNAL_GROUPS=
       - OAUTH_SAML_ATTRIBUTE_STATEMENTS_EMAIL=
       - OAUTH_SAML_ATTRIBUTE_STATEMENTS_NAME=
+      - OAUTH_SAML_ATTRIBUTE_STATEMENTS_USERNAME=
       - OAUTH_SAML_ATTRIBUTE_STATEMENTS_FIRST_NAME=
       - OAUTH_SAML_ATTRIBUTE_STATEMENTS_LAST_NAME=
-  
+
       - OAUTH_CROWD_SERVER_URL=
       - OAUTH_CROWD_APP_NAME=
       - OAUTH_CROWD_APP_PASSWORD=
-  
+
       - OAUTH_AUTH0_CLIENT_ID=
       - OAUTH_AUTH0_CLIENT_SECRET=
       - OAUTH_AUTH0_DOMAIN=
-  
+
       - OAUTH_AZURE_API_KEY=
       - OAUTH_AZURE_API_SECRET=
       - OAUTH_AZURE_TENANT_ID=
-      
+
     volumes_from:
       - dita-ot
       - linkmgr
-      
+
 #
 # Define the GitLab runner
 # that will be used to run build jobs;
@@ -262,22 +261,21 @@ services:
     container_name: gitlab-runner
     restart: always
     volumes:
-     - /var/run/docker.sock:/var/run/docker.sock
-     - gitlabrunner-config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+      - gitlabrunner-config:/etc/gitlab-runner
     volumes_from:
-     - dita-ot
+      - dita-ot
 
 #
 # Web server for HTML delivery
 #
-
   web-delivery:
     extends:
-       file: containers/caddy-d4st/docker-compose.yml  
-       service: caddy-d4st
+      file: containers/caddy-d4st/docker-compose.yml  
+      service: caddy-d4st
     volumes:
       - ${HOME}/tmp/webdelivery:/srv/www
-      
+
 #
 # Demo content data volume:
 #
@@ -295,12 +293,11 @@ services:
 #
 # Oxygen Web Author server
 #
-
   oxywebauthor:
-     extends:
-        file: containers/oxywebauthor-d4st/docker-compose.yml
-        service: oxywebauthor-d4st
-      
+    extends:
+      file: containers/oxywebauthor-d4st/docker-compose.yml
+      service: oxywebauthor-d4st
+
 #  
 # End of compose file.
 #

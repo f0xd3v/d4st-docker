@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # OS X shell script to run the D4ST Docker containers via
 # docker-compose.
@@ -66,9 +66,9 @@ else
 fi
 
 if [ "$OSTYPE" = "msys" ]; then
-  d4stBrowser=${D4ST_BROWSER:-chrome}
+  d4stBrowser=${D4ST_BROWSER:-firefox}
 elif [[ "$OSTYPE" =~ "linux" ]]; then
-  d4stBrowser=${D4ST_BROWSER:-chrome} 
+  d4stBrowser=${D4ST_BROWSER:-firefox}
 else
   # For OS X the browser value is the application bundle name, e.g. "Google Chrome" for Chrome.
   d4stBrowser=${D4ST_BROWSER:-Safari}
@@ -83,7 +83,7 @@ done
 
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 DOCKER_FILE=$DIR/docker-compose.yml
-HOSTNAME=localhost
+HOSTNAME=$(hostname)
 
 # macOS/Linux convention:
 username="$USER"

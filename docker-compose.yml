@@ -1,97 +1,49 @@
-version: "2"
-
-#
-# DITA For Small Teams (D4ST) Docker compose
-# run configuration file. Will run all the 
-# containers with appropriate default settings. 
-#
-# FIXME: Parameterize all appropriate options
-#        with variables with defaults (defined
-#        in the relevant docker files).
-#
-# It runs the DITA OT container, the gitlab 
-# server (for shared git access and continuous
-# integration), and the D4ST Link Manager application.
-#
-# Gitlab is exposed on the default ports 80 and 443
-# for HTTP/HTTPS access and 8022 for SSH
-#
-# The Link Manager is exposed on the default ports
-# of 8984 for the Web app and 1984 for the underlying
-# BaseX server (used by the git hooks installed in the
-# GitLab repositories).
-#
-# The Web server is exposed on port 80.
-# 
+version: "3"
 
 volumes:
-  git-data:
-  redis:
-  postgress:
+  dita-data:
   basex-data:
-  dita-ot-data:
-  dita-ot-out:
+  redis-data:
+  postgres-data:
+  git-data:
   gitlabrunner-config:
 
 services:
-
 #
 # DITA OT
 #
-# This container provides access to a DITA Open Toolkit
-# instace. GitLab uses it to run the OT, BaseX uses
-# it for access to DTDs. 
-#
   dita-ot:
-    extends:
-       file: containers/dita-ot/docker-compose.yml  
-       service: dita-ot-d4st
+    image: ditaot/dita-ot-base:latest
     volumes:
-       - dita-ot-data:/opt/dita-ot/data:Z
-       - dita-ot-out:/opt/dita-ot/out:Z
-    volumes_from:
-       - web-delivery
+      - dita-data:/opt/dita-ot/data
+      - dita-data:/opt/dita-ot/out
+      - ${HOME}/tmp/webdelivery:/srv/www
 
 #
 # D4ST Link Manager
-#
-# The Link Manager provides link-related information
-# for use by authors via an interactive Web app
-# or other applications via REST API.
 #
 
 #
 # Link Manager server:
 #    
   linkmgr:
-    image: d4st/link-manager-basex
-    container_name: linkmgr-d4st
+    build: ./containers/link-manager-basex
+    image: d4st-linkmgr
+    container_name: d4st-linkmgr
     ports: 
-     - "1984:1984"
-     - "${LINKMGR_PORT}:8984"
-
+      - "1984:1984"
+      - "${LINKMGR_PORT}:8984"
     environment:
       - USER
       - USERNAME
-      - OXYWEBAUTHOR_PORT
-      
+      - OXYWEBAUTHOR_PORT    
     volumes:
-       - basex-data:/srv/BaseXData
-       - /Users:/Users
-
-    volumes_from:
-     - dita-ot
+      - basex-data:/srv/BaseXData
+      - dita-data:/opt/dita-ot/data
+      - dita-data:/opt/dita-ot/out
 
 #
 # GitLab
-#
-# NOTE: Using extends with a separate compose file caused gitlab startup to
-#       fail because it didn't have correct permissions on the potsgresql 
-#       server to configure the pg_trgm feature. I don't know why.
-#
-# Copied from https://github.com/sameersbn/docker-gitlab/blob/master/docker-compose.yml
-#
-# Runs the required postgresql and redis servers:
 #
   redis:
     restart: always
@@ -99,13 +51,13 @@ services:
     command:
       - --loglevel warning
     volumes:
-      - redis:/var/lib/redis:Z
+      - redis-data:/var/lib/redis
 
   postgresql:
     restart: always
     image: sameersbn/postgresql:10
     volumes:
-      - postgress:/var/lib/postgresql:Z
+      - postgres-data:/var/lib/postgresql
     environment:
       - DB_USER=gitlab
       - DB_PASS=password
@@ -114,9 +66,9 @@ services:
 
   gitlab-d4st:
     restart: always
-    #image: sameersbn/gitlab:11.8.1
-    image: d4st/gitlab-d4st
-    container_name: gitlab-d4st
+    build: ./containers/gitlab-d4st
+    image: d4st-gitlab
+    container_name: d4st-gitlab
     depends_on:
       - redis
       - postgresql
@@ -124,8 +76,12 @@ services:
       - "${GITLAB_PORT}:80"
       - "${GITLAB_SSH_PORT}:22"
     volumes:
-      # Create a named volume rather than a local mount:
-      - git-data:/home/git/data:Z
+      - git-data:/home/git/data
+      - dita-data:/opt/dita-ot/data
+      - dita-data:/opt/dita-ot/out
+      - ${HOME}/tmp/webdelivery:/srv/www
+      - basex-data:/srv/BaseXData
+
     environment:
       - GITLAB_SECRETS_DB_KEY_BASE=S8ZRV6kN43LQ2sQVmVfTlM32jLzj8FFLf6L6WzxtjwqnXkZlzpc5tc3C7cXbgrqt
       - GITLAB_SECRETS_SECRET_KEY_BASE=S8ZRV6kN43LQ2sQVmVfTlM32jLzj8FFLf6L6WzxtjwqnXkZlzpc5tc3C7cXbgrqt
@@ -248,10 +204,6 @@ services:
       - OAUTH_AZURE_API_SECRET=
       - OAUTH_AZURE_TENANT_ID=
 
-    volumes_from:
-      - dita-ot
-      - linkmgr
-
 #
 # Define the GitLab runner
 # that will be used to run build jobs;
@@ -263,27 +215,21 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - gitlabrunner-config:/etc/gitlab-runner
-    volumes_from:
-      - dita-ot
+      - dita-data:/opt/dita-ot/data
+      - dita-data:/opt/dita-ot/out
+      - ${HOME}/tmp/webdelivery:/srv/www
 
 #
 # Web server for HTML delivery
 #
   web-delivery:
-    extends:
-      file: containers/caddy-d4st/docker-compose.yml  
-      service: caddy-d4st
+    build: ./containers/caddy-d4st  
+    image: d4st-caddy
     volumes:
       - ${HOME}/tmp/webdelivery:/srv/www
 
 #
 # Demo content data volume:
-#
-# Using top as the command so the container is always running
-# so we can then copy files out of it (which requires a running
-# container).
-#
-# Defines volume /opt/dita-community/data/Thunderbird
 #
   demo-content:
     image: ditacommunity/demo-content
@@ -294,9 +240,8 @@ services:
 # Oxygen Web Author server
 #
   oxywebauthor:
-    extends:
-      file: containers/oxywebauthor-d4st/docker-compose.yml
-      service: oxywebauthor-d4st
+    build: ./containers/oxywebauthor-d4st
+    image: d4st-oxywebauthor
 
 #  
 # End of compose file.

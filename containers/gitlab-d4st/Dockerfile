@@ -5,6 +5,7 @@
 # and generally better organized than the office gitlab-ce
 # container.
 FROM sameersbn/gitlab:11.8.1
+#FROM sameersbn/gitlab:8.17.3
 MAINTAINER Eliot Kimber "ekimber@contrext.com"
 COPY admin-scripts /var/opt/d4st/bin/
 RUN cd /var/opt/d4st && \

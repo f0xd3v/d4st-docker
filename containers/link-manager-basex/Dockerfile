@@ -1,4 +1,4 @@
-FROM basex/dba
+FROM hitko/basex-dba
 MAINTAINER Eliot Kimber "ekimber@contrext.com"
 
 # ENV HOME /opt/basex
@@ -12,16 +12,19 @@ USER root
 #
 # Get the Link Manager web application source:
 #
+RUN mkdir -p ${REPODIR}
+RUN mkdir -p ${WEBAPPDIR}/static/
+RUN echo webappdir=$WEBAPPDIR
 
-RUN wget -O /tmp/develop.zip https://github.com/dita-for-small-teams/dfst-linkmgmt-basex/archive/develop.zip && \
-    unzip /tmp/develop.zip -d /tmp && \    
-    rm /tmp/develop.zip && \     
-    cp /tmp/dfst-linkmgmt-basex-develop/webapp/*.xqm ${WEBAPPDIR}/  && \    
-    cp -r /tmp/dfst-linkmgmt-basex-develop/webapp/static/* ${WEBAPPDIR}/static/  && \ 
-    cp -r /tmp/dfst-linkmgmt-basex-develop/modules/* ${REPODIR}  && \  
-    mkdir -p ${WEBAPPDIR}/dba/modules/modules && \  
-    cp /tmp/dfst-linkmgmt-basex-develop/modules/dba/*.xqm ${WEBAPPDIR}/dba/modules/ && \  
-    cp /tmp/dfst-linkmgmt-basex-develop/modules/dba/*.xqm ${WEBAPPDIR}/dba/modules/modules/
+RUN wget -O /tmp/develop.zip https://github.com/dita-for-small-teams/dfst-linkmgmt-basex/archive/develop.zip
+RUN unzip /tmp/develop.zip -d /tmp
+RUN rm /tmp/develop.zip
+RUN cp /tmp/dfst-linkmgmt-basex-develop/webapp/*.xqm ${WEBAPPDIR}/
+RUN cp -r /tmp/dfst-linkmgmt-basex-develop/webapp/static/* ${WEBAPPDIR}/static/
+RUN cp -r /tmp/dfst-linkmgmt-basex-develop/modules/* ${REPODIR}
+RUN mkdir -p ${WEBAPPDIR}/dba/modules/modules
+RUN cp /tmp/dfst-linkmgmt-basex-develop/modules/dba/*.xqm ${WEBAPPDIR}/dba/modules/
+RUN cp /tmp/dfst-linkmgmt-basex-develop/modules/dba/*.xqm ${WEBAPPDIR}/dba/modules/modules/
       
 COPY basex/dot_basex  /srv/.basex 
 RUN chown basex /srv/.basex

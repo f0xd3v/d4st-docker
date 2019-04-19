@@ -1,10 +1,10 @@
-FROM hitko/basex-dba
+FROM basex/basexhttp:latest
 MAINTAINER Eliot Kimber "ekimber@contrext.com"
 
 # ENV HOME /opt/basex
 # ENV PATH $HOME/bin:$PATH
-ENV WEBAPPDIR /srv/BaseXWeb
-ENV REPODIR /srv/BaseXRepo
+ENV WEBAPPDIR /srv/basex/webapp
+ENV REPODIR /srv/basex/repo
 ENV BASEX_JVM="-Dorg.basex.CHOP=false -Dorg.basex.CATFILE=/opt/dita-ot/DITA-OT/catalog-dita.xml -Dorg.basex.DTD=true -Dorg.basex.SKIPCORRUPT=true"
 
 USER root
@@ -12,23 +12,21 @@ USER root
 #
 # Get the Link Manager web application source:
 #
-RUN mkdir -p ${REPODIR}
-RUN mkdir -p ${WEBAPPDIR}/static/
-RUN echo webappdir=$WEBAPPDIR
+##RUN mkdir -p ${REPODIR} && chown basex -R ${REPODIR} && ls -l ${REPODIR}
+##RUN mkdir -p ${WEBAPPDIR} && chown basex -R ${WEBAPPDIR} && ls -l ${WEBAPPDIR}
 
-RUN wget -O /tmp/develop.zip https://github.com/dita-for-small-teams/dfst-linkmgmt-basex/archive/develop.zip
-RUN unzip /tmp/develop.zip -d /tmp
-RUN rm /tmp/develop.zip
-RUN cp /tmp/dfst-linkmgmt-basex-develop/webapp/*.xqm ${WEBAPPDIR}/
-RUN cp -r /tmp/dfst-linkmgmt-basex-develop/webapp/static/* ${WEBAPPDIR}/static/
-RUN cp -r /tmp/dfst-linkmgmt-basex-develop/modules/* ${REPODIR}
-RUN mkdir -p ${WEBAPPDIR}/dba/modules/modules
-RUN cp /tmp/dfst-linkmgmt-basex-develop/modules/dba/*.xqm ${WEBAPPDIR}/dba/modules/
-RUN cp /tmp/dfst-linkmgmt-basex-develop/modules/dba/*.xqm ${WEBAPPDIR}/dba/modules/modules/
+RUN wget -O /tmp/develop.zip https://github.com/dita-for-small-teams/dfst-linkmgmt-basex/archive/develop.zip \
+&& unzip /tmp/develop.zip -d /tmp \
+&& rm /tmp/develop.zip \
+&& cp /tmp/dfst-linkmgmt-basex-develop/webapp/*.xqm ${WEBAPPDIR}/ \
+&& cp -r /tmp/dfst-linkmgmt-basex-develop/webapp/static ${WEBAPPDIR}/ \
+&& cp -r /tmp/dfst-linkmgmt-basex-develop/modules/* ${REPODIR} \
+&& mkdir -p ${WEBAPPDIR}/dba/modules/modules \
+&& cp /tmp/dfst-linkmgmt-basex-develop/modules/dba/*.xqm ${WEBAPPDIR}/dba/modules/ \
+&& cp /tmp/dfst-linkmgmt-basex-develop/modules/dba/*.xqm ${WEBAPPDIR}/dba/modules/modules/
       
-COPY basex/dot_basex  /srv/.basex 
-RUN chown basex /srv/.basex
-
+#COPY basex/dot_basex  /srv/.basex 
+#RUN chown basex /srv/.basex
 
 # ports are defined in the basex/basexhttp base container.
 # Switch to the basex user so the BaseX server will start

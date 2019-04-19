@@ -2,13 +2,10 @@ FROM alpine:3.2
 MAINTAINER Eliot Kimber <ekimber@contrext.com>
 # See e.g., https://hub.docker.com/r/abiosoft/caddy/ for 
 
-LABEL caddy_version="0.9.5" architecture="amd64"
-
+LABEL caddy_version="1.0.0-beta1" architecture="amd64"
 
 RUN mkdir -p /srv/www
-
 RUN apk add --update openssh-client git tar
-
 RUN curl --silent --show-error --fail --location --header "Accept: application/tar+gzip, application/x-gzip, application/octet-stream" -o - \
       "https://caddyserver.com/download/linux/amd64?plugins=http.git&license=personal&telemetry=off" \
     | tar --no-same-owner -C /usr/bin/ -xz caddy

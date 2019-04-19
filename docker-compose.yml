@@ -15,6 +15,7 @@ services:
   dita-ot:
     image: ditaot/dita-ot-base:latest
     volumes:
+      - dita-data:/opt/dita-ot/DITA-OT
       - dita-data:/opt/dita-ot/data
       - dita-data:/opt/dita-ot/out
       - ${HOME}/tmp/webdelivery:/srv/www
@@ -38,7 +39,8 @@ services:
       - USERNAME
       - OXYWEBAUTHOR_PORT    
     volumes:
-      - basex-data:/srv/BaseXData
+      - basex-data:/srv/basex/data
+      - dita-data:/opt/dita-ot/DITA-OT
       - dita-data:/opt/dita-ot/data
       - dita-data:/opt/dita-ot/out
 
@@ -77,10 +79,11 @@ services:
       - "${GITLAB_SSH_PORT}:22"
     volumes:
       - git-data:/home/git/data
+      - dita-data:/opt/dita-ot/DITA-OT
       - dita-data:/opt/dita-ot/data
       - dita-data:/opt/dita-ot/out
       - ${HOME}/tmp/webdelivery:/srv/www
-      - basex-data:/srv/BaseXData
+      - basex-data:/srv/basex/data
 
     environment:
       - GITLAB_SECRETS_DB_KEY_BASE=S8ZRV6kN43LQ2sQVmVfTlM32jLzj8FFLf6L6WzxtjwqnXkZlzpc5tc3C7cXbgrqt
@@ -215,6 +218,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - gitlabrunner-config:/etc/gitlab-runner
+      - dita-data:/opt/dita-ot/DITA-OT
       - dita-data:/opt/dita-ot/data
       - dita-data:/opt/dita-ot/out
       - ${HOME}/tmp/webdelivery:/srv/www
